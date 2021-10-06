@@ -84,6 +84,9 @@ pub fn tokenize(i: &str) -> Vec<Token> {
 
         w.push(c);
     }
+    if w.len() != 0 {
+        panic!("it should be empty: {}", w.to_string());
+    }
     res
 }
 
@@ -270,6 +273,162 @@ Title = "Something Great",
             Token {
                 name: TokenName::TagValue,
                 value: "\"Something Great\"".to_string(),
+            },
+            Token {
+                name: TokenName::Comma,
+                value: ",".to_string(),
+            },
+            Token {
+                name: TokenName::EndingDelimiterTag,
+                value: "}".to_string(),
+            },
+        ];
+        assert_eq!(expect, tt);
+    }
+
+    #[test]
+    fn it_works_with_mix_of_brackets_and_non() {
+        let tt = tokenize(
+            r#"@article{mrx05,
+Title = "{Bib}",
+}"#,
+        );
+        let expect: Vec<Token> = vec![
+            Token {
+                name: TokenName::InitialDelimiterType,
+                value: "@".to_string(),
+            },
+            Token {
+                name: TokenName::Type,
+                value: "article".to_string(),
+            },
+            Token {
+                name: TokenName::InitialDelimiterTag,
+                value: "{".to_string(),
+            },
+            Token {
+                name: TokenName::CitationKey,
+                value: "mrx05".to_string(),
+            },
+            Token {
+                name: TokenName::Comma,
+                value: ",".to_string(),
+            },
+            Token {
+                name: TokenName::TagName,
+                value: "Title".to_string(),
+            },
+            Token {
+                name: TokenName::Equal,
+                value: "=".to_string(),
+            },
+            Token {
+                name: TokenName::TagValue,
+                value: "\"{Bib}\"".to_string(),
+            },
+            Token {
+                name: TokenName::Comma,
+                value: ",".to_string(),
+            },
+            Token {
+                name: TokenName::EndingDelimiterTag,
+                value: "}".to_string(),
+            },
+        ];
+        assert_eq!(expect, tt);
+    }
+
+    #[test]
+    fn it_works_with_tag_as_num() {
+        let tt = tokenize(
+            r#"@article{mrx05,
+Title = 1000,
+}"#,
+        );
+        let expect: Vec<Token> = vec![
+            Token {
+                name: TokenName::InitialDelimiterType,
+                value: "@".to_string(),
+            },
+            Token {
+                name: TokenName::Type,
+                value: "article".to_string(),
+            },
+            Token {
+                name: TokenName::InitialDelimiterTag,
+                value: "{".to_string(),
+            },
+            Token {
+                name: TokenName::CitationKey,
+                value: "mrx05".to_string(),
+            },
+            Token {
+                name: TokenName::Comma,
+                value: ",".to_string(),
+            },
+            Token {
+                name: TokenName::TagName,
+                value: "Title".to_string(),
+            },
+            Token {
+                name: TokenName::Equal,
+                value: "=".to_string(),
+            },
+            Token {
+                name: TokenName::TagValue,
+                value: "1000".to_string(),
+            },
+            Token {
+                name: TokenName::Comma,
+                value: ",".to_string(),
+            },
+            Token {
+                name: TokenName::EndingDelimiterTag,
+                value: "}".to_string(),
+            },
+        ];
+        assert_eq!(expect, tt);
+    }
+
+    #[test]
+    fn it_works_with_tag_value_with_double_brackets() {
+        let tt = tokenize(
+            r#"@article{mrx05,
+Title = {{Bib}\TeX},
+}"#,
+        );
+        let expect: Vec<Token> = vec![
+            Token {
+                name: TokenName::InitialDelimiterType,
+                value: "@".to_string(),
+            },
+            Token {
+                name: TokenName::Type,
+                value: "article".to_string(),
+            },
+            Token {
+                name: TokenName::InitialDelimiterTag,
+                value: "{".to_string(),
+            },
+            Token {
+                name: TokenName::CitationKey,
+                value: "mrx05".to_string(),
+            },
+            Token {
+                name: TokenName::Comma,
+                value: ",".to_string(),
+            },
+            Token {
+                name: TokenName::TagName,
+                value: "Title".to_string(),
+            },
+            Token {
+                name: TokenName::Equal,
+                value: "=".to_string(),
+            },
+            Token {
+                name: TokenName::TagValue,
+                value: "{{Bib}\\TeX}".to_string(),
             },
             Token {
                 name: TokenName::Comma,
