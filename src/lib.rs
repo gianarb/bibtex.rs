@@ -5,7 +5,11 @@ const ENDING_DELIMITER_TAG: char = '}';
 pub fn tokenize(i: &str) -> Vec<Token> {
     let mut res = vec![];
     let mut w = String::from("");
+    let mut ii = 0;
+    let tot_len = i.len();
+
     for c in i.chars() {
+        ii = ii + 1;
         if c == '\n' {
             continue;
         }
@@ -73,7 +77,13 @@ pub fn tokenize(i: &str) -> Vec<Token> {
             continue;
         }
 
-        if c == ENDING_DELIMITER_TAG && res.last().unwrap().name == TokenName::Comma {
+        if c == ENDING_DELIMITER_TAG && ii == tot_len {
+            if !w.is_empty() {
+                res.push(Token {
+                    name: TokenName::TagValue,
+                    value: w.trim().to_string(),
+                });
+            }
             res.push(Token {
                 name: TokenName::EndingDelimiterTag,
                 value: ENDING_DELIMITER_TAG.to_string(),
@@ -278,6 +288,53 @@ Title = "Something Great",
             Token {
                 name: TokenName::Comma,
                 value: ",".to_string(),
+            },
+            Token {
+                name: TokenName::EndingDelimiterTag,
+                value: "}".to_string(),
+            },
+        ];
+        assert_eq!(expect, tt);
+    }
+
+    #[test]
+    fn it_works_with_last_tag_without_comma() {
+        let tt = tokenize(
+            r#"@article{mrx05, Title = "1000"
+}"#,
+        );
+        let expect: Vec<Token> = vec![
+            Token {
+                name: TokenName::InitialDelimiterType,
+                value: "@".to_string(),
+            },
+            Token {
+                name: TokenName::Type,
+                value: "article".to_string(),
+            },
+            Token {
+                name: TokenName::InitialDelimiterTag,
+                value: "{".to_string(),
+            },
+            Token {
+                name: TokenName::CitationKey,
+                value: "mrx05".to_string(),
+            },
+            Token {
+                name: TokenName::Comma,
+                value: ",".to_string(),
+            },
+            Token {
+                name: TokenName::TagName,
+                value: "Title".to_string(),
+            },
+            Token {
+                name: TokenName::Equal,
+                value: "=".to_string(),
+            },
+            Token {
+                name: TokenName::TagValue,
+                value: "\"1000\"".to_string(),
             },
             Token {
                 name: TokenName::EndingDelimiterTag,
