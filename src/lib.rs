@@ -2,14 +2,19 @@ const INITIAL_DELIMITER_TYPE: char = '@';
 const INITIAL_DELIMITER_TAG: char = '{';
 const ENDING_DELIMITER_TAG: char = '}';
 
-pub fn tokenize(i: &str) -> Vec<Token> {
+#[derive(Debug)]
+pub enum BibtexError {
+    LeftOver(String),
+}
+
+pub fn tokenize(i: &str) -> Result<Vec<Token>, BibtexError> {
     let mut res = vec![];
     let mut w = String::from("");
     let mut ii = 0;
     let tot_len = i.len();
 
     for c in i.chars() {
-        ii = ii + 1;
+        ii += 1;
         if c == '\n' {
             continue;
         }
@@ -94,10 +99,10 @@ pub fn tokenize(i: &str) -> Vec<Token> {
 
         w.push(c);
     }
-    if w.len() != 0 {
-        panic!("it should be empty: {}", w.to_string());
+    if !w.is_empty() {
+        return Err(BibtexError::LeftOver(w));
     }
-    res
+    Ok(res)
 }
 
 #[derive(Debug, PartialEq)]
@@ -225,7 +230,7 @@ YEAR = "2005",
                 value: "}".to_string(),
             },
         ];
-        assert_eq!(expect, tt);
+        assert_eq!(expect, tt.unwrap());
     }
 
     #[test]
@@ -294,7 +299,7 @@ Title = "Something Great",
                 value: "}".to_string(),
             },
         ];
-        assert_eq!(expect, tt);
+        assert_eq!(expect, tt.unwrap());
     }
 
     #[test]
@@ -341,7 +346,7 @@ Title = "Something Great",
                 value: "}".to_string(),
             },
         ];
-        assert_eq!(expect, tt);
+        assert_eq!(expect, tt.unwrap());
     }
 
     #[test]
@@ -392,7 +397,7 @@ Title = "Something Great",
                 value: "}".to_string(),
             },
         ];
-        assert_eq!(expect, tt);
+        assert_eq!(expect, tt.unwrap());
     }
 
     #[test]
@@ -444,7 +449,7 @@ Title = {{Bib}\TeX},
                 value: "}".to_string(),
             },
         ];
-        assert_eq!(expect, tt);
+        assert_eq!(expect, tt.unwrap());
     }
 
     #[test]
@@ -547,6 +552,6 @@ YEAR = 2005,
                 value: "}".to_string(),
             },
         ];
-        assert_eq!(expect, tt);
+        assert_eq!(expect, tt.unwrap());
     }
 }
