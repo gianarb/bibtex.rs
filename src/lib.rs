@@ -451,6 +451,13 @@ Title = {{Bib}\TeX},
         ];
         assert_eq!(expect, tt.unwrap());
     }
+    #[test]
+    fn fuzz_first() {
+        let _ = tokenize(
+            r#",
+"#,
+        );
+    }
 
     #[test]
     fn it_works_e2e_test_from_bibtex_org() {
