@@ -5,6 +5,7 @@ const ENDING_DELIMITER_TAG: char = '}';
 #[derive(Debug)]
 pub enum BibtexError {
     LeftOver(String),
+    InvalidSyntax(String),
 }
 
 pub fn tokenize(i: &str) -> Result<Vec<Token>, BibtexError> {
@@ -13,10 +14,19 @@ pub fn tokenize(i: &str) -> Result<Vec<Token>, BibtexError> {
     let mut ii = 0;
     let tot_len = i.len();
 
-    for c in i.chars() {
+    let input = i.trim();
+
+    for c in input.chars() {
         ii += 1;
         if c == '\n' {
             continue;
+        }
+
+        if c != INITIAL_DELIMITER_TYPE && ii == 1 {
+            return Err(BibtexError::InvalidSyntax(format!(
+                "The firt chart should be a {}",
+                INITIAL_DELIMITER_TYPE
+            )));
         }
 
         if c == INITIAL_DELIMITER_TYPE {
@@ -25,6 +35,7 @@ pub fn tokenize(i: &str) -> Result<Vec<Token>, BibtexError> {
                 value: c.to_string(),
             });
             continue;
+        } else {
         }
 
         if c == INITIAL_DELIMITER_TAG && res.last().unwrap().name == TokenName::InitialDelimiterType
@@ -451,8 +462,12 @@ Title = {{Bib}\TeX},
         ];
         assert_eq!(expect, tt.unwrap());
     }
+
+    // This test comes from a fuzzing session. This library was not checking for valid syntax yet.
+    // This tests asserts that the first chart is the one expected. If it is not, it returns an
+    // error.
     #[test]
-    fn fuzz_first() {
+    fn from_fuzzing_invalid_first_chart() {
         let _ = tokenize(
             r#",
 "#,
