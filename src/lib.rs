@@ -11,18 +11,16 @@ pub enum BibtexError {
 pub fn tokenize(i: &str) -> Result<Vec<Token>, BibtexError> {
     let mut res = vec![];
     let mut w = String::from("");
-    let mut ii = 0;
     let tot_len = i.len();
 
     let input = i.trim();
 
-    for c in input.chars() {
-        ii += 1;
+    for (ii, c) in input.chars().enumerate() {
         if c == '\n' {
             continue;
         }
 
-        if c != INITIAL_DELIMITER_TYPE && ii == 1 {
+        if c != INITIAL_DELIMITER_TYPE && ii == 0 {
             return Err(BibtexError::InvalidSyntax(format!(
                 "The firt chart should be a {}",
                 INITIAL_DELIMITER_TYPE
@@ -92,7 +90,7 @@ pub fn tokenize(i: &str) -> Result<Vec<Token>, BibtexError> {
             continue;
         }
 
-        if c == ENDING_DELIMITER_TAG && ii == tot_len {
+        if c == ENDING_DELIMITER_TAG && ii == tot_len - 1 {
             if !w.is_empty() {
                 res.push(Token {
                     name: TokenName::TagValue,
